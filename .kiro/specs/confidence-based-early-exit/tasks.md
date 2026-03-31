@@ -180,15 +180,15 @@ Implement the full confidence-based early exit system using a Transformer/MLP ba
 - [x] 10. Checkpoint — Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [-] 11. Wire everything together
-  - [-] 11.1 Implement `src/main.py` entry point
+- [x] 11. Wire everything together
+  - [x] 11.1 Implement `src/main.py` entry point
     - Parse CLI arg `--config`; call `ConfigLoader.load()`; seed RNGs; build backbone + `EarlyExitModel`; run `Trainer`; run `AnalysisPipeline.run_sweep()`; write outputs
     - _Requirements: 8.1, 8.2, 8.3_
-  - [~] 11.2 Write integration test in `tests/integration/test_full_pipeline.py`
+  - [x] 11.2 Write integration test in `tests/integration/test_full_pipeline.py`
     - Train Transformer backbone for 1 epoch on a tiny CIFAR-10 subset; run threshold sweep; assert output files (CSV, plots, JSON, config log) exist
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 8.2_
 
-- [~] 12. Final checkpoint — Ensure all tests pass
+- [x] 12. Final checkpoint — Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

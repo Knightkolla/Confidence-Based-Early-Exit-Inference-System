@@ -181,9 +181,9 @@ def test_2d_input_batch_features():
 
 
 def test_3d_input_global_avg_pool():
-    # (batch, channels, spatial) -> global avg pool over dim=2
+    # (batch, seq_len, embed_dim) from Transformer -> pool over seq dim (dim=1)
     head = make_exit_head(num_classes=10, in_features=64)
-    x = torch.randn(4, 64, 16)
+    x = torch.randn(4, 16, 64)  # (batch, seq_len, embed_dim)
     output = head(x)
     assert output.logits.shape == (4, 10)
     assert output.confidence.shape == (4,)

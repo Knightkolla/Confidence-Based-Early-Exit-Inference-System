@@ -9,13 +9,15 @@ from src.models.types import InferenceResult
 
 
 class InferenceEngine:
-    def __init__(self, model: EarlyExitModel) -> None:
+    def __init__(self, model: EarlyExitModel, device: torch.device | None = None) -> None:
         self.model = model
+        self.device = device or torch.device("cpu")
 
     def infer(self, x: Tensor, threshold: float) -> InferenceResult:
         """Run single-sample inference, exiting at the first head whose confidence >= threshold."""
         if x.dim() == 3:
             x = x.unsqueeze(0)
+        x = x.to(self.device)
 
         self.model.eval()
         with torch.no_grad():

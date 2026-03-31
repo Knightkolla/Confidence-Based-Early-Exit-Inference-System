@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.optim import SGD, Adam
 from torch.optim.lr_scheduler import CosineAnnealingLR, StepLR
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from src.config.pretty_printer import PrettyPrinter
 from src.config.types import ExperimentConfig
@@ -16,9 +17,11 @@ class Trainer:
         self,
         model: EarlyExitModel,
         config: ExperimentConfig,
+        device: torch.device | None = None,
     ) -> None:
         self.model = model
         self.config = config
+        self.device = device or torch.device("cpu")
 
         num_epochs = config.num_epochs
 
@@ -53,14 +56,19 @@ class Trainer:
         config_text = PrettyPrinter().format(config)
         (output_dir / "config.yaml").write_text(config_text)
 
-    def train_epoch(self, data_loader: DataLoader) -> float:
+    def train_epoch(self, data_loader: DataLoader, epoch: int = 0, total_epochs: int = 0) -> float:
         self.model.train()
         criterion = nn.CrossEntropyLoss()
         weights = self.config.exit_loss_weights
         total_loss = 0.0
         num_batches = 0
 
-        for inputs, targets in data_loader:
+        desc = f"Epoch {epoch:>3}/{total_epochs}" if total_epochs else "Training"
+        pbar = tqdm(data_loader, desc=desc, leave=False, unit="batch")
+
+        for inputs, targets in pbar:
+            inputs = inputs.to(self.device)
+            targets = targets.to(self.device)
             self.optimizer.zero_grad()
             exit_outputs = self.model(inputs)
 
@@ -73,12 +81,52 @@ class Trainer:
 
             total_loss += loss.item()
             num_batches += 1
+            pbar.set_postfix(loss=f"{loss.item():.4f}")
 
         return total_loss / num_batches if num_batches > 0 else 0.0
 
-    def train(self, train_loader: DataLoader, num_epochs: int | None = None) -> None:
+    def evaluate(self, data_loader: DataLoader) -> float:
+        """Return accuracy of the final head on the given data loader."""
+        self.model.eval()
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for inputs, targets in data_loader:
+                inputs = inputs.to(self.device)
+                targets = targets.to(self.device)
+                exit_outputs = self.model(inputs)
+                # final head is always the last output
+                preds = exit_outputs[-1].predicted_class
+                correct += (preds == targets).sum().item()
+                total += targets.size(0)
+        return correct / total if total > 0 else 0.0
+
+    def train(
+        self,
+        train_loader: DataLoader,
+        num_epochs: int | None = None,
+        eval_loader: DataLoader | None = None,
+    ) -> None:
         epochs = num_epochs if num_epochs is not None else self.config.num_epochs
-        for _ in range(epochs):
-            self.train_epoch(train_loader)
+        total = epochs
+        for epoch in range(1, total + 1):
+            train_loss = self.train_epoch(train_loader, epoch=epoch, total_epochs=total)
+            lr = self.optimizer.param_groups[0]["lr"]
+
+            if eval_loader is not None:
+                val_acc = self.evaluate(eval_loader)
+                print(
+                    f"Epoch {epoch:>3}/{total}  "
+                    f"loss={train_loss:.4f}  "
+                    f"val_acc={val_acc:.4f}  "
+                    f"lr={lr:.6f}"
+                )
+            else:
+                print(
+                    f"Epoch {epoch:>3}/{total}  "
+                    f"loss={train_loss:.4f}  "
+                    f"lr={lr:.6f}"
+                )
+
             if self.scheduler is not None:
                 self.scheduler.step()

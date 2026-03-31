@@ -26,10 +26,11 @@ class ExitHead(nn.Module):
         self.linear = nn.Linear(in_features, num_classes)
 
     def forward(self, features: Tensor) -> ExitOutput:
-        # Reduce spatial dimensions for CNN feature maps before the linear layer
         if features.dim() == 3:
-            x = features.mean(dim=2)
+            # (batch, seq_len, embed_dim) from Transformer — pool over sequence
+            x = features.mean(dim=1)
         elif features.dim() == 4:
+            # (batch, channels, h, w) from CNN — pool over spatial dims
             x = features.mean(dim=(2, 3))
         else:
             x = features

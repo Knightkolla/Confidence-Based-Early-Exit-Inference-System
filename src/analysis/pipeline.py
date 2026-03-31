@@ -4,6 +4,7 @@ import os
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import torch
 from torch.utils.data import DataLoader
 
 from src.engine.inference import InferenceEngine
@@ -13,8 +14,13 @@ from src.models.early_exit_model import EarlyExitModel
 
 
 class AnalysisPipeline:
-    def __init__(self, model: EarlyExitModel, data_loader: DataLoader) -> None:
-        self._engine = InferenceEngine(model)
+    def __init__(
+        self,
+        model: EarlyExitModel,
+        data_loader: DataLoader,
+        device: torch.device | None = None,
+    ) -> None:
+        self._engine = InferenceEngine(model, device=device)
         self._data_loader = data_loader
 
     def run_sweep(self, thresholds: list[float]) -> TradeoffTable:

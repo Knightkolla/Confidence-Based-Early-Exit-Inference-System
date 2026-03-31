@@ -1,0 +1,27 @@
+# Kiro IDE
+.kiro/
+
+# Virtual environment
+venv/
+
+# Experiment outputs
+outputs/
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.hypothesis/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+*.swp

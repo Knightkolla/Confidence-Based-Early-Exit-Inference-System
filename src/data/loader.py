@@ -72,13 +72,13 @@ class DatasetLoader:
             batch_size=batch_size,
             shuffle=True,
             num_workers=num_workers,
-            pin_memory=True,
+            pin_memory=False,
         )
         eval_loader = DataLoader(
             eval_dataset,
             batch_size=batch_size,
             shuffle=False,
             num_workers=num_workers,
-            pin_memory=True,
+            pin_memory=False,
         )
         return train_loader, eval_loader
