@@ -1,4 +1,4 @@
-# AdaComp — Project Specification
+# Confidence-Based-Early-Exit-Inference-System — Project Specification
 
 This document consolidates the requirements, design, and implementation plan for the confidence-based early exit system. It serves as the authoritative reference for the project's intended behavior, architecture, and correctness guarantees.
 
