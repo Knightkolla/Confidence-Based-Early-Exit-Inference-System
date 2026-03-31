@@ -1,4 +1,4 @@
-# AdaComp — Adaptive Computation via Confidence-Aware Early Exits
+# Confidence-Based Early Exit Inference System
 
 A research framework for studying confidence-based early exit inference in deep neural networks. The core question: **how much computation can you skip on easy inputs while preserving accuracy?**
 
